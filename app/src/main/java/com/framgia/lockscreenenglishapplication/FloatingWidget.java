@@ -70,6 +70,11 @@ public class FloatingWidget extends Service implements View.OnClickListener,
         initComponents();
         initData();
         initMediaPlayer();
+        if (isPlaying()) {
+            stop();
+        } else {
+            start();
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -91,6 +96,7 @@ public class FloatingWidget extends Service implements View.OnClickListener,
         mCloseWidget = mFloatingView.findViewById(R.id.button_close_widget);
         mOpenButton = mFloatingView.findViewById(R.id.button_open_app);
         mPlaySound = mFloatingView.findViewById(R.id.play_btn);
+        mCloseWidget.setOnClickListener(this);
         mButtonCloseCollapsed.setOnClickListener(this);
         mOpenButton.setOnClickListener(this);
         mPlaySound.setOnClickListener(this);
@@ -122,6 +128,7 @@ public class FloatingWidget extends Service implements View.OnClickListener,
                 stopSelf();
                 break;
             case R.id.button_close_widget:
+                System.out.println("closed");
                 collapsedView.setVisibility(View.VISIBLE);
                 expandedView.setVisibility(View.GONE);
                 break;
@@ -179,9 +186,6 @@ public class FloatingWidget extends Service implements View.OnClickListener,
                 //Calculate the X and Y coordinates of the view.
                 params.x = initialX + (int) (event.getRawX() - initialTouchX);
                 params.y = initialY + (int) (event.getRawY() - initialTouchY);
-
-                System.out.println(params.x
-                        + " y:" + params.y);
                 //Update the layout with new X & Y coordinate
                 mWindowManager.updateViewLayout(mFloatingView, params);
                 return true;

@@ -5,7 +5,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.view.Display;
@@ -23,6 +25,7 @@ import java.io.IOException;
 /**
  * Created by superme198 on 11,April,2019
  * in LockScreenEnglishApplication.
+ * LInk:https://developer.android.com/guide/topics/media/mediaplayer
  */
 public class FloatingWidget extends Service implements View.OnClickListener,
         MediaPlayer.OnCompletionListener,
@@ -128,7 +131,6 @@ public class FloatingWidget extends Service implements View.OnClickListener,
                 stopSelf();
                 break;
             case R.id.button_close_widget:
-                System.out.println("closed");
                 collapsedView.setVisibility(View.VISIBLE);
                 expandedView.setVisibility(View.GONE);
                 break;
@@ -154,15 +156,6 @@ public class FloatingWidget extends Service implements View.OnClickListener,
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
-    }
-
-    /**
-     * Detect if the floating view is collapsed or expanded.
-     *
-     * @return true if the floating view is collapsed.
-     */
-    private boolean isViewCollapsed() {
-        return mFloatingView == null || mFloatingView.findViewById(R.id.collapse_view).getVisibility() == View.VISIBLE;
     }
 
     private Display getScreenSize() {
@@ -207,6 +200,9 @@ public class FloatingWidget extends Service implements View.OnClickListener,
 //                                System.out.println(params.x
 //                                        + " y:" + params.y);
 //                                mWindowManager.updateViewLayout(mFloatingView, params);
+                    } else {
+                        collapsedView.setVisibility(View.VISIBLE);
+                        expandedView.setVisibility(View.GONE);
                     }
                 }
                 return true;
@@ -251,16 +247,29 @@ public class FloatingWidget extends Service implements View.OnClickListener,
     @Override
     public void start() {
         if (mMediaPlayer != null) {
-            play("");
+            playStream("");
         }
     }
 
     @Override
     public void play(String uriString) {
         mMediaPlayer = MediaPlayer.create(mContext, R.raw.notification_sound);
-        mMediaPlayer.setVolume(50,50);
-
+        mMediaPlayer.setVolume(50, 50);
         mMediaPlayer.start();
+    }
+
+    @Override
+    public void playStream(String url) {
+        mMediaPlayer = MediaPlayer.create(mContext, Uri.parse("https://dictionary.cambridge.org/media/english/us_pron/d/dog/dog__/dog.mp3"));
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            mediaPlayer.setDataSource("https://dictionary.cambridge.org/media/english/us_pron/d/dog/dog__/dog.mp3");
+            mediaPlayer.prepare(); // might take long! (for buffering, etc)
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void destroyMusic() {
@@ -269,6 +278,15 @@ public class FloatingWidget extends Service implements View.OnClickListener,
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
+    }
+
+    /**
+     * Detect if the floating view is collapsed or expanded.
+     *
+     * @return true if the floating view is collapsed.
+     */
+    private boolean isViewCollapsed() {
+        return mFloatingView == null || collapsedView.getVisibility() == View.VISIBLE;
     }
 
     public class FloatingBinder extends Binder {

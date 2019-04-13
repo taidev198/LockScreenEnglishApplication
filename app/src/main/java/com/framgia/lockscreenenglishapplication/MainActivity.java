@@ -7,15 +7,14 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String[] PERMISSIONS = {SYSTEM_ALERT_WINDOW};
+    public static final String[] PERMISSIONS = {ACCESS_NETWORK_STATE};
     private static final int CODE_DRAW_OVER_OTHER_APP_PERMISSION = 2084;
     Button mButton;
 
@@ -24,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mButton = findViewById(R.id.createBtn);
+        if (!isAllowPermission())
+            finish();
         mButton.setOnClickListener((e) -> {
 
         });
@@ -68,4 +69,16 @@ public class MainActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+    private boolean isAllowPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (String permission : PERMISSIONS) {
+                if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(PERMISSIONS, 0);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }

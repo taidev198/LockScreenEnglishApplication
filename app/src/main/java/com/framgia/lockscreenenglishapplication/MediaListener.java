@@ -15,4 +15,6 @@ interface MediaListener {
 
     void play(String uriString);
 
+    void playStream(String url);
+
 }
